@@ -72,3 +72,43 @@
 ;; In this example we consed pork to a list containing beef and chicken.
 (cons 'pork (cons 'beef (cons 'chicken ()))) ;; (PORK BEEF CHICKEN)
 ;; Lisp, a chain of cons cells and a list are exactly the same thing.
+
+;; the car and cdr functions
+;; list are just long chains of two-item cells.
+
+;; car function is used for getting the thing out of the first slot of a cell.
+;; so grabs head of the list
+(car '(pork beef chicken)) ;; (PORK)
+
+;; cdr function is used to grab the value out of the second slot, or the remainder of a list
+(cdr '(pork beef chicken)) ;; (BEEF CHICKEN)
+
+;; we can chain car and cdr functions like that:
+(car (cdr '(pork beef chicken))) ;; (BEEF)
+;; mix car and cdr -> cadr
+;; grab the second item in the list.
+(cadr '(pork beef chicken)) ;; (BEEF)
+
+;; the list function
+;; Common Lisp has many functions built on top of the basic three---cons, car and cdr.
+;; list function does the dirty work of creating all the cons cells and builds our list.
+
+(list 'pork 'beef 'chicken) ;; (PORK BEEF CHICKEN)
+
+(cons 'pork (cons 'beef (cons 'chicken ())))
+
+'(pork beef chicken)
+
+;; ^- all the same
+
+;; nested lists
+;; lists can contain other lists:
+'(cat (duck bar) ant) ;; (CAT (DUCK BAT) ANT)
+
+;; nested list has are made of cons cells, so car will grab the first item which is a list.
+(car '((peas carrots tomatoes) (pork beef chicken))) ;; (PEAS CARROTS TOMATOES)
+(cdr '(peas carrots tomatoes)) ;; (CARROTS TOMATOES)
+(cdr (car '((peas carrots tomatoes) (pork beef chicken)))) ;; (CARROTS TOMATOES
+(cdar '((peas carrots tomatoes) (pork beef chicken))) ;; (CARROTS TOMATOES)
+
+;; Common Lisp already defines all these functions for you. You can use any function with  the name c*r right out of the box, up to four levels deep.
