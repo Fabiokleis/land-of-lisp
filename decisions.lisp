@@ -158,3 +158,25 @@
 
 
 ;; comparing stuff: eq, equal, and more
+;; eq -> to compare symbols
+;; equal -> for everything else
+(defparameter *fruit* 'apple)
+(cond ((eq *fruit* 'apple) 'its-an-apple)
+      ((eq *fruit* 'orange) 'its-an-orange))
+
+(equal 'apple 'apple) ;; T
+(equal (list 1 2 3) (list 1 2 3)) ;; T
+(equal '(1 2 3) (cons 1 (cons 2 (cons 3)))) ;; T
+(equal 5 5) ;; T
+(equal 2.5 2.5) ;; T
+(equal "foo" "foo") ;; T
+(equal #\a #\a) ;; T
+
+;; the eql command is similar to the eq command, but unlike eq, it also handles comparisons of numbers and characters:
+(eql 'foo 'foo) ;; T
+(eql 3.4 3.4) ;; T
+(eql #\a #\a) ;; T
+
+;; the equalp command is essentially the same as the equal command, except that it can handle some difficult comparison cases with a bit of extra sophistication. For instance, it can compare strings with different capitalizations and can compare integers against floating-potin numbers:
+(equalp "Bob Smitth" "bob smith") ;; T
+(equalp 0 0.0) ;; T
