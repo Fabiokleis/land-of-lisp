@@ -27,7 +27,7 @@
 ;; - objects that you can pick up and manipulate
 ;; lets add features for these one at time
 
-(defparameter *node* '((living-room (you are in the living-room.
+(defparameter *nodes* '((living-room (you are in the living-room.
 				     a wizard is snoring loudly on the couch.))
 		      (garden (you are in a beautiful garden.
 				   there is a well in front of you.))
@@ -49,7 +49,7 @@
 			(attic (living-room downstairs ladder))))
 
 (defun describe-path (edge)
-  `(there is a, (caddr edge) going, (cadr edge) from here.))
+  `(there is a ,(caddr edge) going ,(cadr edge) from here.))
 
 ;; quasiquoting
 (describe-path '(garden west door)) ;; (THERE IS A DOOR GOING WEST FROM HERE.)
@@ -171,3 +171,70 @@
 ;; the programming style used by describe-path is very typical for Lisp code.
 ;; It involves passing along a complicated chunk of data and manipulating it in
 ;; several steps, often using higher-order functions.
+
+;; describing objects at a specific location
+;; listing visible objects
+(defparameter *objects* '(whiskey bucket frog chain))
+;; we can also create a second variable, *object-locations*, to track the location
+;; of each object in the form of an list:
+(defparameter *object-locations* '((whiskey living-room)
+				   (bucket living-room)
+				   (chain garden)
+				   (frog garden)))
+
+;; lists the objects visible from a given location:
+(defun objects-at (loc objs obj-locs)
+  (labels ((at-loc-p (obj)
+	     (eq (cadr (assoc obj obj-locs)) loc)))
+    (remove-if-not #'at-loc-p objs)))
+
+;; at-loc-p taks the symbol for an object and returns t or nil,
+;; depending on whether that object exists at the location loc.
+;; It does this by looking up the object in the obj-locs list.
+;; why did we name this function at-loc-p? When a function returns
+;; nil or a truth value, it's a Common Lisp convention to append
+;; a p to the end of that function's name.
+
+;; the remove-if-not function in the last line of the listing, as you
+;; might expect, removes all things from a list which a passed-in function
+;; (in this case, at-loc-p) doesn't return true. Essentially, it returns a
+;; filtered list of objects consisting of those items for which at-loc-p is true.
+
+(objects-at 'living-room *objects* *object-locations*)
+;; (WHISKEY BUCKET)
+
+;; describing visible objects
+;; now we can write a function to describe the objects visible at a given location:
+(defun describe-objects (loc objs obj-loc)
+  (labels ((describe-obj (obj)
+	     `(you see a ,obj on the floor.)))
+    (apply #'append (mapcar #'describe-obj (objects-at loc objs obj-loc)))))
+
+;; describe-objects first creates the describe-obj function. this function
+;; generates a pretty sentence stating that a given object is on the floor,
+;; using quasiquoting. the main part of the function conssists of calling
+;; objects-at to find the objects at the current location, mapping describe-obj across
+;; this list of objects, and finally appending the descriptions into a single list.
+(describe-objects 'living-room *objects* *object-locations*)
+;; (YOU SEE A WHISKEY ON THE FLOOR. YOU SEE A BUCKET ON THE FLOOR.)
+
+;; describing it all
+;; now we'll tie all of these description functions into one easy command
+;; called look. Because this will be the actual command players can enter
+;; to look around them in the game, look will need to know a player's current
+;; location. so, we need a variable to track the player's current position.
+(defparameter *location* 'living-room)
+(defun look ()
+  (append (describe-location *location* *nodes*)
+	  (describe-paths *location* *edges*)
+	  (describe-objects *location* *objects* *object-locations*)))
+;; look function uses global variable names (such as *location*, *nodes*m and so on),
+;; the player won't need to pass in any funky values in order to look out at the world.
+;; however, this also means that the look function in programming style reference
+;; only parameters or variables declared in the function itself. *location* and its
+;; ilk are global variables, so the look function doesn't hold up muster.
+(look)
+;; (YOU ARE IN THE LIVING-ROOM. A WIZARD IS SNORING LOUDLY ON THE COUCH. THERE IS A
+;; DOOR GOING WEST FROM HERE. THERE IS A LADDER GOING UPSTAIRS FROM HERE. YOU SEE
+;; A WHISKEY ON THE FLOOR. YOU SEE A BUCKET ON THE FLOOR.)
+
