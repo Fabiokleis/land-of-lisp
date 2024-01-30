@@ -238,3 +238,64 @@
 ;; DOOR GOING WEST FROM HERE. THERE IS A LADDER GOING UPSTAIRS FROM HERE. YOU SEE
 ;; A WHISKEY ON THE FLOOR. YOU SEE A BUCKET ON THE FLOOR.)
 
+;; walking around in our world
+(defun walk (direction)
+  (let ((next (find direction
+		    (cdr (assoc *location* *edges*))
+		    :key #'cadr)))
+    (if next
+	(progn (setf *location* (car next))
+	       (look))
+	'(you cannot go that way.))))
+
+;; find searches a list for an item, then returns that found item.
+
+;; lookups up the available walking paths in the *edges* table,
+;; using the current location. find function locate the path
+;; marked with the direction.
+;; keyword parameter. in Common Lisp, many functions have built-in
+;; features that can be accessed by passing in special parameters
+;; at the end of the function call. For instance, the following
+;; code finds the first item in a list that has the symbol y in
+;; the cadr location:
+(find 'y '((5 x) (3 y) (7 z)) :key #'cadr) ;; (3 Y)
+(find 'y '(1 2 z s 5 y a)) ;; Y
+
+;; a keyworkd parameter has two parts:
+;; the first is the name (in this case :key), which begins with a colon.
+;; the second is the value, which in this case is #'cadr.
+
+
+;; picking up objects
+(defun pickup (object)
+  (cond ((member object
+		 (objects-at *location* *objects* *object-locations*))
+	 (push (list object 'body) *object-locations*)
+	 `(you are now carrying the ,object))
+	(t '(you cannot get that.))))
+
+(defparameter *foo* '(1 2 3))
+(push 7 *foo*) ;; (7 1 2 3)
+*foo* ;; (7 1 2 3)
+
+;; push command is basically a convenience function built on top of setf.
+;; for example, we could hava replaced the preceding push command with
+;; (setf *foo* (cons 7 *foo*)) and obtained the same result.
+;; using the push and assoc commands together in this way allows us to
+;; pretend that values in an list are changing, while still preserving
+;; old values. old values are simply suppressed by newer values, thus
+;; preserving a history of all old values. the push/assoc idiom is a
+;; common technique used by Lispers.
+
+;; checking our inventory
+(defun inventory()
+  (cons 'items- (object-at 'body *objects* *object-locations*)))
+;; this inventory function uses the objects-at function to retrieve
+;; a list of objecets at a requested location. when an object was
+;; picked  up by the player, we changed its location to 'body: this
+;; is the location we now use to query.
+
+(inventory) ;; (ITEMS- WHISKEY)
+
+
+;; alist -> association list
